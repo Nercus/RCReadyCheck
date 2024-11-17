@@ -1,0 +1,11 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.blizzard.com/wow/ui/ https://raw.githubusercontent.com/Gethe/wow-ui-source/live/Interface/AddOns/Blizzard_SharedXML/UI.xsd">
+    <Script file="core.lua" />
+    <Include file="importFrame/_imports.xml" />
+    <Include file="lootFrame/_imports.xml" />
+    <Include file="lootHistory/_imports.xml" />
+    <Include file="shareData/_imports.xml" />
+    <Include file="votingFrame/_imports.xml" />
+    <Include file="wishFrame/_imports.xml" />
+</Ui>

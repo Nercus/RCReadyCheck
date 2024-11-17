@@ -1,0 +1,20 @@
+package-as: RCReadyCheck
+
+externals:
+  libs/CallbackHandler-1.0: https://repos.wowace.com/wow/callbackhandler/trunk/CallbackHandler-1.0
+  libs/LibStub: https://repos.wowace.com/wow/libstub/trunk
+
+enable-nolib-creation: no
+
+ignore:
+  - README.md
+  - CHANGELOG.md
+  - annotations.lua
+
+required-dependencies:
+  - callbackhandler
+  - libstub
+
+manual-changelog:
+  filename: CHANGELOG.md
+  markup-type: markdown
