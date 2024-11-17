@@ -4,8 +4,5 @@
     <Script file="core.lua" />
     <Include file="importFrame/_imports.xml" />
     <Include file="lootFrame/_imports.xml" />
-    <Include file="lootHistory/_imports.xml" />
-    <Include file="shareData/_imports.xml" />
     <Include file="votingFrame/_imports.xml" />
-    <Include file="wishFrame/_imports.xml" />
 </Ui>
