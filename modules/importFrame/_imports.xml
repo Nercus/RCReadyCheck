@@ -3,27 +3,20 @@
     xsi:schemaLocation="http://www.blizzard.com/wow/ui/ https://raw.githubusercontent.com/Gethe/wow-ui-source/live/Interface/AddOns/Blizzard_SharedXML/UI.xsd">
     <Script file="importFrame.lua" />
 
-
     <Frame name="RCReadyCheckImportFrameTemplate" inherits="DefaultPanelTemplate"
         parent="UIParent" enableMouse="true" movable="true" virtual="true">
-        <Size x="600" y="400" />
+        <Size x="600" y="100" />
         <Anchors>
             <Anchor point="CENTER" />
         </Anchors>
         <Frames>
-            <Button parentKey="importButton" inherits="SharedButtonLargeTemplate">
-                <Size x="150" y="30" />
-                <Anchors>
-                    <Anchor point="BOTTOM" relativePoint="BOTTOM" x="0" y="10" />
-                </Anchors>
-            </Button>
             <Button parentKey="closeButton" inherits="UIPanelCloseButtonDefaultAnchors" />
-            <ScrollFrame parentKey="scrollFrame" enableMouse="true" inherits="ScrollFrameTemplate">
-                <Size x="590" y="1" />
+            <EditBox parentKey="editBox" multiLine="false" autoFocus="false"
+                font="GameFontHighlight">
+                <TextInsets left="10" top="10" right="-5" bottom="10" />
                 <Anchors>
-                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT"
-                        relativeKey="$parent.TitleContainer" x="-8" y="-12" />
-                    <Anchor point="BOTTOMRIGHT" x="-15" y="50" />
+                    <Anchor point="TOPLEFT" x="20" y="-34" />
+                    <Anchor point="BOTTOMRIGHT" x="-20" y="15" />
                 </Anchors>
                 <Layers>
                     <Layer level="BACKGROUND">
@@ -36,57 +29,35 @@
                         </Texture>
                     </Layer>
                 </Layers>
-                <KeyValues>
-                    <KeyValue key="scrollBarX" value="-14" />
-                    <KeyValue key="scrollBarTopY" value="-5" type="number" />
-                    <KeyValue key="scrollBarBottomY" value="5" type="number" />
-                </KeyValues>
-                <ScrollChild>
-                    <EditBox parentKey="editBox" multiLine="true" autoFocus="false"
-                        font="GameFontHighlight">
-                        <TextInsets left="10" top="10" right="-5" bottom="10" />
-                        <Anchors>
-                            <Anchor point="TOP" x="0" y="-5" />
-                        </Anchors>
-                        <Scripts>
-                            <OnEditFocusLost>
-                                local parent = self:GetParent();
-                                parent.focusButton:Show();
-                            </OnEditFocusLost>
-                            <OnEditFocusGained>
-                                local parent = self:GetParent();
-                                parent.focusButton:Hide();
-                            </OnEditFocusGained>
-                            <OnShow>
-                                local parent = self:GetParent();
-                                self:SetText("");
-                            </OnShow>
-                        </Scripts>
-                    </EditBox>
-                </ScrollChild>
                 <Scripts>
-                    <OnSizeChanged>
-                        local width, height = self:GetSize();
-                        self.editBox:SetSize(width - 25, height - 10);
-                    </OnSizeChanged>
+                    <OnEditFocusLost>
+                        self.focusButton:Show();
+                    </OnEditFocusLost>
+                    <OnEditFocusGained>
+                        self.focusButton:Hide();
+                    </OnEditFocusGained>
+                    <OnShow>
+                        local parent = self:GetParent();
+                        self:SetText("");
+                    </OnShow>
                 </Scripts>
                 <Frames>
                     <Frame parentKey="focusButton" setAllPoints="true" enableMouse="true"
                         propagateMouseInput="Both">
                         <Scripts>
                             <OnMouseDown>
-                                local parent = self:GetParent();
-                                parent.editBox:SetFocus();
+                                local editBox = self:GetParent();
+                                editBox:SetFocus();
                                 self:Hide();
                             </OnMouseDown>
                             <OnShow>
-                                local parent = self:GetParent();
-                                if not parent.editBox then return end
-                                local editBoxText = parent.editBox:GetText();
+                                local editBox = self:GetParent();
+                                if not editBox then return end
+                                local editBoxText = editBox:GetText();
                                 if editBoxText ~= "" then
                                     self.infoText:SetText("");
                                 else
-                                    self.infoText:SetText(GUILD_EDIT_TEXT_LINK);
+                                    self.infoText:SetText("[Paste your ReadyCheck data here]");
                                 end
                             </OnShow>
                         </Scripts>
@@ -94,12 +65,13 @@
                             <Layer level="OVERLAY">
                                 <FontString parentKey="infoText" setAllPoints="true"
                                     inherits="GameFontDisable"
-                                    text="GUILD_EDIT_TEXT_LINK" justifyH="CENTER" justifyV="MIDDLE" />
+                                    text="[Paste your ReadyCheck data here]" justifyH="CENTER"
+                                    justifyV="MIDDLE" />
                             </Layer>
                         </Layers>
                     </Frame>
                 </Frames>
-            </ScrollFrame>
+            </EditBox>
         </Frames>
         <Scripts>
             <OnMouseDown>

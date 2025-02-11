@@ -13,6 +13,7 @@ function ImportFrame:ParseImport(importString)
         ---@type table<string, any>
         local data = RCReadyCheck:DeserializeJSON(importString)
         if data then
+            RCReadyCheck:Debug(data)
             RCReadyCheck:Print(L["Data imported"])
             RCReadyCheck:SaveVar("importedData", data)
             success = true
@@ -29,20 +30,35 @@ function ImportFrame:CreateImportFrame()
     if self.frame then return end
     self.frame = CreateFrame("Frame", "RCLootCouncil_ImportFrame", UIParent, "RCReadyCheckImportFrameTemplate")
     self.frame:SetTitle(L["Import Frame"])
-    self.frame.importButton:SetText(L["Import"])
-    self.frame.importButton:SetEnabled(false)
 
     ---@type EditBox
-    local editBox = self.frame.scrollFrame.editBox
-    self.frame.importButton:SetScript("OnClick", function()
-        local importString = editBox:GetText()
-        self:ParseImport(importString)
+    local editBox = self.frame.editBox
+    local textBuffer, i, lastPaste = {}, 0, 0
+    local function clearBuffer(self)
+        self:SetScript('OnUpdate', nil)
+        local pasted = strtrim(table.concat(textBuffer))
+        editBox:ClearFocus();
+        pasted = pasted:match("^%s*(.-)%s*$");
+        if (#pasted > 20) then
+            ImportFrame:ParseImport(pasted);
+            -- self.frame:SetTitle(L["Processed %i chars"]:format(i));
+            editBox:SetMaxBytes(2500);
+            editBox:SetText(strsub(pasted, 1, 2500));
+        end
+    end
+
+    editBox:SetScript('OnChar', function(self, c)
+        if lastPaste ~= GetTime() then
+            textBuffer, i, lastPaste = {}, 0, GetTime()
+            self:SetScript('OnUpdate', clearBuffer)
+        end
+        i = i + 1
+        ---@type table<string, string>
+        textBuffer[i] = c
     end)
 
-    editBox:SetScript("OnTextChanged", function()
-        local text = editBox:GetText()
-        self.frame.importButton:SetEnabled(strlen(text) > 0)
-    end)
+    editBox:SetText("");
+    editBox:SetMaxBytes(2500);
 end
 
 function ImportFrame:OpenImportFrame()
