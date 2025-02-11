@@ -4,7 +4,7 @@ local RCReadyCheck = select(2, ...)
 
 
 
----@alias ModuleName "ImportFrame" |  "VotingFrame"
+---@alias ModuleName "ImportFrame" |  "VotingFrame" | "Database"
 
 ---@param name ModuleName
 ---@return table

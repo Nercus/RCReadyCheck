@@ -1,6 +1,7 @@
 ---@class RCReadyCheck
 local RCReadyCheck = select(2, ...)
 local ImportFrame = RCReadyCheck:CreateModule("ImportFrame")
+local Database = RCReadyCheck:GetModule("Database")
 --- Holds all the constants for the addon
 
 local L = RCReadyCheck.L
@@ -13,9 +14,8 @@ function ImportFrame:ParseImport(importString)
         ---@type table<string, any>
         local data = RCReadyCheck:DeserializeJSON(importString)
         if data then
-            RCReadyCheck:Debug(data)
             RCReadyCheck:Print(L["Data imported"])
-            RCReadyCheck:SaveVar("importedData", data)
+            Database:SetBulkData(data.selections)
             success = true
         end
     end
