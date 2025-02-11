@@ -17,9 +17,9 @@ local difficulyTable = {
 }
 
 
-local iconNote = string.format("|T%s:0|t", "Interface/AddOns/RCReadyCheck/assets/Note.png")
-local iconUpgrade = string.format("|T%s:0|t", "Interface/AddOns/RCReadyCheck/assets/ArrowUp.png")
-local iconDowngrade = string.format("|T%s:0:|t", "Interface/AddOns/RCReadyCheck/assets/ArrowDown.png")
+local iconNote = string.format("|T%s:12:12|t", "Interface/AddOns/RCReadyCheck/assets/Note.png")
+local iconUpgrade = string.format("|T%s:12:12|t", "Interface/AddOns/RCReadyCheck/assets/ArrowUp.png")
+local iconDowngrade = string.format("|T%s:12:12|t", "Interface/AddOns/RCReadyCheck/assets/ArrowDown.png")
 
 ---@param frame Frame
 ---@param lootEntry? ImportDataEntry
@@ -117,7 +117,7 @@ function VotingFrame:AddReadyCheckColumn()
         name = "Readycheck.io",
         DoCellUpdate = VotingFrame.SetCellValue,
         colName = "readycheckio",
-        width = 120,
+        width = 200,
     })
 
     self:UpdateSortNext()
