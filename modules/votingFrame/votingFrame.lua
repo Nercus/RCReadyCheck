@@ -17,6 +17,30 @@ local difficulyTable = {
 }
 
 
+---@class HistoryEntry
+---@field date string date in the form of "YYYY/MM/DD"
+---@field difficultyID number difficulty of the raid
+---@field note string? note for the item
+---@field response string response of the player (e.g. "BiS - I want that item")
+---@field lootWon string hyperlink of the item
+
+
+function VotingFrame:GetTodayAwardedItemsForPlayer(playerName, realmName)
+    local awardedItems = {}
+    ---@type table<string, HistoryEntry>
+    local historyDB = RCReadyCheck.RC:GetHistoryDB()
+    if not historyDB then return awardedItems end
+    local key = playerName .. "-" .. realmName
+    local historyDBEntry = historyDB[key]
+    if not historyDBEntry then return awardedItems end
+    for _, entry in ipairs(historyDBEntry) do
+        if entry.date == date("%Y/%m/%d") then
+            table.insert(awardedItems, entry)
+        end
+    end
+    return awardedItems
+end
+
 local iconNote = string.format("|T%s:12:12|t", "Interface/AddOns/RCReadyCheck/assets/Note.png")
 local iconUpgrade = string.format("|T%s:12:12|t", "Interface/AddOns/RCReadyCheck/assets/ArrowUp.png")
 local iconDowngrade = string.format("|T%s:12:12|t", "Interface/AddOns/RCReadyCheck/assets/ArrowDown.png")
@@ -30,6 +54,7 @@ function VotingFrame:UpdateVotingFrameEntry(frame, lootEntry)
         frame:SetScript("OnLeave", nil)
         return
     end
+
 
     local upgradeIcon = (lootEntry.absoluteGain and (lootEntry.absoluteGain > 0 and iconUpgrade or iconDowngrade)) or ""
     local relativeGain = (lootEntry.relativeGain and string.format("(%.2f%%)", lootEntry.relativeGain * 100)) or ""
@@ -49,6 +74,17 @@ function VotingFrame:UpdateVotingFrameEntry(frame, lootEntry)
         if lootEntry.relativeGain then
             GameTooltip:AddLine(string.format("%s Relative Gain: %.2f%%", upgradeIcon, lootEntry.relativeGain * 100))
         end
+        local awardedItems = VotingFrame:GetTodayAwardedItemsForPlayer(lootEntry.characterName, lootEntry.characterRealm)
+        if #awardedItems > 0 then
+            -- add a separator line if there are awarded items
+            GameTooltip:AddLine("--------------")
+            GameTooltip:AddLine("Awarded Items:")
+            for _, entry in ipairs(awardedItems) do
+                local difficultyName = GetDifficultyInfo(entry.difficultyID)
+                GameTooltip:AddLine(string.format("(%s) %s - %s - %s", difficultyName, entry.lootWon, entry.response,
+                    entry.note or ""))
+            end
+        end
         GameTooltip:Show()
     end)
     frame:SetScript("OnLeave", function()
@@ -65,13 +101,11 @@ function VotingFrame:SetCellValue(frame, data, cols, row, realrow, column, fShow
         local itemTable = { strsplit(":", itemLink) }
         local difficulty = difficulyTable[tonumber(itemTable[13])]
         if (not difficulty) then
-            print("Difficulty not found")
             VotingFrame:UpdateVotingFrameEntry(frame)
             return
         end
         local dataEntry = Database:GetEntry(data[realrow].name, difficulty, lootTable[session].itemID)
         if not dataEntry then
-            print("entry not found")
             VotingFrame:UpdateVotingFrameEntry(frame)
             return
         end
@@ -96,7 +130,9 @@ function VotingFrame:UpdateSortNext()
 end
 
 local retries = 0
+local added = false
 function VotingFrame:AddReadyCheckColumn()
+    if added then return end
     if not RCVotingFrame.scrollCols and retries < 10 then
         C_Timer.After(0.1, function()
             RCVotingFrame:AddReadyCheckColumn()
@@ -121,6 +157,7 @@ function VotingFrame:AddReadyCheckColumn()
     })
 
     self:UpdateSortNext()
+    added = true
 end
 
 function VotingFrame:OnMessageReceived(msg, ...)
