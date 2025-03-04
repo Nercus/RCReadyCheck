@@ -1,11 +1,11 @@
-## Interface: 110005
+## Interface: 110100
 
 ## Title: RCLootCouncil Readycheck.io
 ## Notes: Incorporates Readycheck.io data into RCLootCouncil
 
 ## Author: Nerc
 ## Version: @project-version@
-## IconTexture: Interface\Addons\RCReadyCheck\assets\logo.png
+## IconTexture: Interface\Addons\RCReadyCheck\assets\onsIcon.blp
 ## Dependencies: RCLootCouncil
 ## SavedVariables: RCReadyCheckDB
 

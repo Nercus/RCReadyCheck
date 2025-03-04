@@ -1,19 +1,18 @@
 package-as: RCReadyCheck
 
 externals:
-  libs/CallbackHandler-1.0: https://repos.wowace.com/wow/callbackhandler/trunk/CallbackHandler-1.0
   libs/LibStub: https://repos.wowace.com/wow/libstub/trunk
+  libs/NercLib: https://github.com/Nercus/NercLib
 
 enable-nolib-creation: no
 
 ignore:
   - README.md
   - CHANGELOG.md
-  - annotations.lua
 
 required-dependencies:
-  - callbackhandler
   - libstub
+  - nerclib
 
 manual-changelog:
   filename: CHANGELOG.md
