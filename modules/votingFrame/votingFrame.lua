@@ -181,11 +181,18 @@ function VotingFrame:AddReadyCheckColumn()
     added = true
 end
 
+local Utils = RCReadyCheck:GetModule("Utils")
+local Database = RCReadyCheck:GetModule("Database")
+local debouncedOutdateWarning = Utils:DebounceChange(function()
+    Database:ShowOutdatedDBWarning()
+end, 1)
+
 function VotingFrame:OnMessageReceived(msg, ...)
     if msg == "RCSessionChangedPre" then
         local s = unpack({ ... })
         session = s
     end
+    debouncedOutdateWarning()
 end
 
 local Events = RCReadyCheck:GetModule("Events")
