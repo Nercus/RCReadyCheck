@@ -40,14 +40,13 @@ function ImportFrame:CreateImportFrame()
     local textBuffer, i, lastPaste = {}, 0, 0
     local function clearBuffer(self)
         self:SetScript('OnUpdate', nil)
-        local pasted = strtrim(table.concat(textBuffer))
+        local pasted = string.trim(table.concat(textBuffer))
         editBox:ClearFocus();
         pasted = pasted:match("^%s*(.-)%s*$");
         if (#pasted > 20) then
             ImportFrame:ParseImport(pasted);
-            -- self.frame:SetTitle(L["Processed %i chars"]:format(i));
             editBox:SetMaxBytes(2500);
-            editBox:SetText(strsub(pasted, 1, 2500));
+            editBox:SetText(string.sub(pasted, 1, 2500));
         end
     end
 

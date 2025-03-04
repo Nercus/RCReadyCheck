@@ -41,7 +41,9 @@
         ".vscode",
         "libs"
     ],
-    "Lua.diagnostics.disable": [],
+    "Lua.diagnostics.disable": [
+        "redefined-local"
+    ],
     "Lua.diagnostics.neededFileStatus": {
         "global-element": "Any",
         "missing-global-doc": "Any",
@@ -60,8 +62,11 @@
     "cSpell.words": [
         "Nerc",
         "rcrc",
+        "Readycheck",
+        "readycheckio",
         "realrow",
-        "sortnext"
+        "sortnext",
+        "unicode"
     ],
     "Lua.workspace.library": [
         "~\\Documents\\FramexmlAnnotations",

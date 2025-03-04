@@ -113,13 +113,13 @@ function VotingFrame:UpdateVotingFrameEntry(frame, characterName, lootEntry)
     end)
 end
 
-function VotingFrame:SetCellValue(frame, data, cols, row, realrow, column, fShow, table, ...)
+function VotingFrame:SetCellValue(frame, data, _, _, realrow, column)
     ---@type table <string, any>
     local lootTable = RCReadyCheck.RC:GetLootTable()
     if lootTable and lootTable[session] then
         local itemLink = lootTable[session].link
-        -- generate a table from the itemlink by splitting on :
-        local itemTable = { strsplit(":", itemLink) }
+        -- generate a table from the itemLink by splitting on :
+        local itemTable = { string.split(":", itemLink) }
         local difficulty = difficultyTable[tonumber(itemTable[13])]
         if (not difficulty) then
             VotingFrame:UpdateVotingFrameEntry(frame)
@@ -170,7 +170,7 @@ function VotingFrame:AddReadyCheckColumn()
         end
     end
 
-    tinsert(RCVotingFrame.scrollCols, {
+    table.insert(RCVotingFrame.scrollCols, {
         name = "Readycheck.io",
         DoCellUpdate = VotingFrame.SetCellValue,
         colName = "readycheckio",
@@ -182,7 +182,6 @@ function VotingFrame:AddReadyCheckColumn()
 end
 
 local Utils = RCReadyCheck:GetModule("Utils")
-local Database = RCReadyCheck:GetModule("Database")
 local debouncedOutdateWarning = Utils:DebounceChange(function()
     Database:ShowOutdatedDBWarning()
 end, 1)
