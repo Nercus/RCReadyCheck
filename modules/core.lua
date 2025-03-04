@@ -10,4 +10,6 @@ SlashCommand:SetSlashTrigger("/rcrc")
 SlashCommand:EnableHelpCommand('help', 'Show This Help Message')
 
 local Debug = RCReadyCheck:GetModule("Debug")
-Debug:AddAddonToWhitelist("RCLootCouncil")
+if Debug.AddAddonToWhitelist then
+    Debug:AddAddonToWhitelist("RCLootCouncil")
+end
