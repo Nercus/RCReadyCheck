@@ -11,5 +11,4 @@
 
 libs\_imports.xml
 RCReadyCheck.lua
-utils\_imports.xml
 modules\_imports.xml

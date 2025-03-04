@@ -1,6 +1,12 @@
 ---@diagnostic disable: no-unknown
----@class RCReadyCheck
-local RCReadyCheck = select(2, ...)
+---@type string
+local AddOnName = ...
+
+---@class RCReadyCheck : NercLibAddon
+local RCReadyCheck = LibStub("NercLib"):GetAddon(AddOnName)
+
+---@class JSON
+local JSON = RCReadyCheck:GetModule("JSON")
 
 --
 -- json.lua
@@ -370,7 +376,7 @@ parse = function(str, idx)
 end
 
 
-function RCReadyCheck:DeserializeJSON(str)
+function JSON:Deserialize(str)
     if type(str) ~= "string" then
         error("expected argument of type string, got " .. type(str))
     end

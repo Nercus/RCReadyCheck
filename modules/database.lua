@@ -1,8 +1,15 @@
----@class RCReadyCheck
-local RCReadyCheck = select(2, ...)
+---@type string
+local AddOnName = ...
+
+---@class RCReadyCheck : NercLibAddon
+local RCReadyCheck = LibStub("NercLib"):GetAddon(AddOnName)
+
 ---@class Database
 ---@field db table<string, table<DIFFICULTY, table<number, ImportDataEntry>>>
-local Database = RCReadyCheck:CreateModule("Database")
+local Database = RCReadyCheck:GetModule("Database")
+local SavedVars = RCReadyCheck:GetModule("SavedVars")
+local Events = RCReadyCheck:GetModule("Events")
+local Text = RCReadyCheck:GetModule("Text")
 
 Database.db = {}
 
@@ -54,7 +61,8 @@ function Database:SetBulkData(data)
     for _, entry in ipairs(data) do
         self:SetDataEntry(entry)
     end
-    RCReadyCheck:SaveVar("importedData", self.db)
+    SavedVars:SetVar("importedData", self.db)
+    SavedVars:SetVar("lastImport", time())
 end
 
 function Database:GetEntry(characterName, difficulty, wowItemId)
@@ -73,12 +81,29 @@ function Database:GetEntry(characterName, difficulty, wowItemId)
 end
 
 function Database:RestoreDB()
-    local db = RCReadyCheck:GetVar("importedData")
+    local db = SavedVars:GetVar("importedData")
     if db then
         self.db = db --[[@as table]]
     end
 end
 
-RCReadyCheck:RegisterEvent("PLAYER_LOGIN", function()
+function Database:ShowOutdatedDBWarning()
+    local lastImport = SavedVars:GetVar("lastImport")
+    if not lastImport then
+        return
+    end
+    local diff = time() - lastImport
+    if diff > 1 then
+        Text:Print(Text:WrapTextInColor("The imported data is outdated. Please import new data.", ERROR_COLOR))
+        UIErrorsFrame:AddMessage("The imported data is outdated. Please import new data.", ERROR_COLOR.r, ERROR_COLOR.g,
+            ERROR_COLOR.b)
+    end
+end
+
+Events:RegisterEvent("PLAYER_LOGIN", function()
     Database:RestoreDB()
+end)
+
+Events:RegisterEvent("PLAYER_ENTERING_WORLD", function()
+    Database:ShowOutdatedDBWarning()
 end)

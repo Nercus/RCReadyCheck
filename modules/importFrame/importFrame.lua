@@ -1,10 +1,14 @@
----@class RCReadyCheck
-local RCReadyCheck = select(2, ...)
-local ImportFrame = RCReadyCheck:CreateModule("ImportFrame")
-local Database = RCReadyCheck:GetModule("Database")
---- Holds all the constants for the addon
+---@type string
+local AddOnName = ...
 
-local L = RCReadyCheck.L
+---@class RCReadyCheck : NercLibAddon
+local RCReadyCheck = LibStub("NercLib"):GetAddon(AddOnName)
+
+---@class ImportFrame
+local ImportFrame = RCReadyCheck:GetModule("ImportFrame")
+local Database = RCReadyCheck:GetModule("Database")
+local Text = RCReadyCheck:GetModule("Text")
+local JSON = RCReadyCheck:GetModule("JSON")
 
 
 function ImportFrame:ParseImport(importString)
@@ -12,9 +16,9 @@ function ImportFrame:ParseImport(importString)
 
     if importString then
         ---@type table<string, any>
-        local data = RCReadyCheck:DeserializeJSON(importString)
+        local data = JSON:Deserialize(importString)
         if data then
-            RCReadyCheck:Print(L["Data imported"])
+            Text:Print("Data imported")
             Database:SetBulkData(data.selections)
             success = true
         end
@@ -22,14 +26,14 @@ function ImportFrame:ParseImport(importString)
     if (success) then
         self:CloseImportFrame()
     else
-        RCReadyCheck:Print(L["Failed to import"])
+        Text:Print("Failed to import")
     end
 end
 
 function ImportFrame:CreateImportFrame()
     if self.frame then return end
     self.frame = CreateFrame("Frame", "RCLootCouncil_ImportFrame", UIParent, "RCReadyCheckImportFrameTemplate")
-    self.frame:SetTitle(L["Import Frame"])
+    self.frame:SetTitle("Import Frame")
 
     ---@type EditBox
     local editBox = self.frame.editBox
@@ -82,6 +86,7 @@ function ImportFrame:ToggleImportFrame()
     end
 end
 
-RCReadyCheck:AddSlashCommand("import", function()
+local SlashCommand = RCReadyCheck:GetModule("SlashCommand")
+SlashCommand:AddSlashCommand("import", function()
     ImportFrame:ToggleImportFrame()
-end, L["Open the import frame"])
+end, "Open the import frame")

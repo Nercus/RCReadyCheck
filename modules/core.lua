@@ -1,7 +1,13 @@
----@class RCReadyCheck
-local RCReadyCheck = select(2, ...)
-local L = RCReadyCheck.L
+---@type string
+local AddOnName = ...
 
------------------------------------------------------
+---@class RCReadyCheck : NercLibAddon
+local RCReadyCheck = LibStub("NercLib"):GetAddon(AddOnName)
 
-RCReadyCheck.RC = LibStub("AceAddon-3.0"):GetAddon("RCLootCouncil")
+
+local SlashCommand = RCReadyCheck:GetModule("SlashCommand")
+SlashCommand:SetSlashTrigger("/rcrc")
+SlashCommand:EnableHelpCommand('help', 'Show This Help Message')
+
+local Debug = RCReadyCheck:GetModule("Debug")
+Debug:AddAddonToWhitelist("RCLootCouncil")

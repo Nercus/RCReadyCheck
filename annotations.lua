@@ -194,7 +194,6 @@ function SubMenuUtil:CreateDivider() end
 
 function SubMenuUtil:CreateSpacer() end
 
-
 ---@param frameType string
 ---@param parent string?
 ---@param frameTemplate string?

@@ -1,7 +1,11 @@
 ---@diagnostic disable: no-unknown, undefined-field
----@class RCReadyCheck
-local RCReadyCheck = select(2, ...)
-local VotingFrame = RCReadyCheck:CreateModule("VotingFrame")
+---@type string
+local AddOnName = ...
+
+---@class RCReadyCheck : NercLibAddon
+local RCReadyCheck = LibStub("NercLib"):GetAddon(AddOnName)
+---@class VotingFrame
+local VotingFrame = RCReadyCheck:GetModule("VotingFrame")
 local Database = RCReadyCheck:GetModule("Database")
 
 ---@class RCVotingFrame : AceModule
@@ -10,7 +14,7 @@ local RCVotingFrame = RCReadyCheck.RC:GetModule("RCVotingFrame")
 local session = 1
 
 ---@type table<number, DIFFICULTY>
-local difficulyTable = {
+local difficultyTable = {
     [4] = "NORMAL",
     [5] = "HEROIC",
     [6] = "MYTHIC",
@@ -24,13 +28,16 @@ local difficulyTable = {
 ---@field response string response of the player (e.g. "BiS - I want that item")
 ---@field lootWon string hyperlink of the item
 
-
 function VotingFrame:GetTodayAwardedItemsForPlayer(playerName, realmName)
     local awardedItems = {}
     ---@type table<string, HistoryEntry>
     local historyDB = RCReadyCheck.RC:GetHistoryDB()
     if not historyDB then return awardedItems end
-    local key = playerName .. "-" .. realmName
+    ---@type string
+    local key = playerName
+    if (realmName) then
+        key = playerName .. "-" .. realmName --[[@as string]]
+    end
     local historyDBEntry = historyDB[key]
     if not historyDBEntry then return awardedItems end
     for _, entry in ipairs(historyDBEntry) do
@@ -46,12 +53,26 @@ local iconUpgrade = string.format("|T%s:12:12|t", "Interface/AddOns/RCReadyCheck
 local iconDowngrade = string.format("|T%s:12:12|t", "Interface/AddOns/RCReadyCheck/assets/ArrowDown.png")
 
 ---@param frame Frame
+---@param characterName? string
 ---@param lootEntry? ImportDataEntry
-function VotingFrame:UpdateVotingFrameEntry(frame, lootEntry)
+function VotingFrame:UpdateVotingFrameEntry(frame, characterName, lootEntry)
     if not lootEntry then
         frame.text:SetText("-")
-        frame:SetScript("OnEnter", nil)
-        frame:SetScript("OnLeave", nil)
+        frame:SetScript("OnEnter", function(self)
+            GameTooltip:SetOwner(self, "ANCHOR_CURSOR_RIGHT")
+            local awardedItems = VotingFrame:GetTodayAwardedItemsForPlayer(characterName)
+            if #awardedItems > 0 then
+                -- add a separator line if there are awarded items
+                GameTooltip:AddLine("--------------")
+                GameTooltip:AddLine("Awarded Items:")
+                for _, entry in ipairs(awardedItems) do
+                    local difficultyName = GetDifficultyInfo(entry.difficultyID)
+                    GameTooltip:AddLine(string.format("(%s) %s - %s - %s", difficultyName, entry.lootWon, entry.response,
+                        entry.note or ""))
+                end
+            end
+            GameTooltip:Show()
+        end)
         return
     end
 
@@ -99,7 +120,7 @@ function VotingFrame:SetCellValue(frame, data, cols, row, realrow, column, fShow
         local itemLink = lootTable[session].link
         -- generate a table from the itemlink by splitting on :
         local itemTable = { strsplit(":", itemLink) }
-        local difficulty = difficulyTable[tonumber(itemTable[13])]
+        local difficulty = difficultyTable[tonumber(itemTable[13])]
         if (not difficulty) then
             VotingFrame:UpdateVotingFrameEntry(frame)
             return
@@ -109,7 +130,7 @@ function VotingFrame:SetCellValue(frame, data, cols, row, realrow, column, fShow
             VotingFrame:UpdateVotingFrameEntry(frame)
             return
         end
-        VotingFrame:UpdateVotingFrameEntry(frame, dataEntry)
+        VotingFrame:UpdateVotingFrameEntry(frame, data[realrow].name, dataEntry)
     end
     data[realrow].cols[column].value = "BiS - I want that item"
 end
@@ -167,7 +188,8 @@ function VotingFrame:OnMessageReceived(msg, ...)
     end
 end
 
-RCReadyCheck:RegisterEvent("PLAYER_ENTERING_WORLD", function()
+local Events = RCReadyCheck:GetModule("Events")
+Events:RegisterEvent("PLAYER_ENTERING_WORLD", function()
     VotingFrame:AddReadyCheckColumn()
 end)
 
