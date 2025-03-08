@@ -21,13 +21,13 @@ local difficultyTable = {
     [6] = "MYTHIC",
 }
 
-
 ---@class HistoryEntry
 ---@field date string date in the form of "YYYY/MM/DD"
 ---@field difficultyID number difficulty of the raid
 ---@field note string? note for the item
 ---@field response string response of the player (e.g. "BiS - I want that item")
 ---@field lootWon string hyperlink of the item
+---@field responseID string
 
 function VotingFrame:GetTodayAwardedItemsForPlayer(playerName, realmName)
     local awardedItems = {}
@@ -60,6 +60,20 @@ local iconNote = string.format("|T%s:12:12|t", "Interface/AddOns/RCReadyCheck/as
 local iconUpgrade = string.format("|T%s:12:12|t", "Interface/AddOns/RCReadyCheck/assets/ArrowUp.png")
 local iconDowngrade = string.format("|T%s:12:12|t", "Interface/AddOns/RCReadyCheck/assets/ArrowDown.png")
 
+---@param entry HistoryEntry
+---@return string
+local function GetAwardedItemString(entry)
+    local difficultyName
+    if entry.difficultyID then
+        difficultyName = GetDifficultyInfo(entry.difficultyID)
+    end
+    return string.format("- %s %s %s %s", difficultyName or "", entry.lootWon or "", entry.response or "",
+        entry.note or "")
+end
+
+
+
+
 ---@param frame Frame
 ---@param characterName? string
 ---@param lootEntry? ImportDataEntry
@@ -71,12 +85,10 @@ function VotingFrame:UpdateVotingFrameEntry(frame, characterName, lootEntry)
             local awardedItems = VotingFrame:GetTodayAwardedItemsForPlayer(characterName)
             if #awardedItems > 0 then
                 -- add a separator line if there are awarded items
-                GameTooltip:AddLine("--------------")
+                GameTooltip:AddLine(CreateAtlasMarkup("RecipeList-Divider", 272, 6))
                 GameTooltip:AddLine("Awarded Items:")
                 for _, entry in ipairs(awardedItems) do
-                    local difficultyName = GetDifficultyInfo(entry.difficultyID)
-                    GameTooltip:AddLine(string.format("(%s) %s - %s - %s", difficultyName, entry.lootWon, entry.response,
-                        entry.note or ""))
+                    GameTooltip:AddLine(GetAwardedItemString(entry))
                 end
             end
             GameTooltip:Show()
@@ -106,12 +118,10 @@ function VotingFrame:UpdateVotingFrameEntry(frame, characterName, lootEntry)
         local awardedItems = VotingFrame:GetTodayAwardedItemsForPlayer(lootEntry.characterName, lootEntry.characterRealm)
         if #awardedItems > 0 then
             -- add a separator line if there are awarded items
-            GameTooltip:AddLine("--------------")
+            GameTooltip:AddLine(CreateAtlasMarkup("RecipeList-Divider", 272, 6))
             GameTooltip:AddLine("Awarded Items:")
             for _, entry in ipairs(awardedItems) do
-                local difficultyName = GetDifficultyInfo(entry.difficultyID)
-                GameTooltip:AddLine(string.format("(%s) %s - %s - %s", difficultyName, entry.lootWon, entry.response,
-                    entry.note or ""))
+                GameTooltip:AddLine(GetAwardedItemString(entry))
             end
         end
         GameTooltip:Show()
@@ -130,12 +140,12 @@ function VotingFrame:SetCellValue(frame, data, _, _, realrow, column)
         local itemTable = { string.split(":", itemLink) }
         local difficulty = difficultyTable[tonumber(itemTable[13])]
         if (not difficulty) then
-            VotingFrame:UpdateVotingFrameEntry(frame)
+            VotingFrame:UpdateVotingFrameEntry(frame, data[realrow].name)
             return
         end
         local dataEntry = Database:GetEntry(data[realrow].name, difficulty, lootTable[session].itemID)
         if not dataEntry then
-            VotingFrame:UpdateVotingFrameEntry(frame)
+            VotingFrame:UpdateVotingFrameEntry(frame, data[realrow].name)
             return
         end
         VotingFrame:UpdateVotingFrameEntry(frame, data[realrow].name, dataEntry)
