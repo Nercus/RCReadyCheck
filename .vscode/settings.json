@@ -74,6 +74,8 @@
         "readycheckio",
         "realrow",
         "sortnext",
+        "strsplit",
+        "strsplittable",
         "unicode"
     ],
     "Lua.workspace.library": [

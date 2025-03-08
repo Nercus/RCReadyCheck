@@ -7,6 +7,7 @@ local RCReadyCheck = LibStub("NercLib"):GetAddon(AddOnName)
 ---@class VotingFrame
 local VotingFrame = RCReadyCheck:GetModule("VotingFrame")
 local Database = RCReadyCheck:GetModule("Database")
+local Item = RCReadyCheck:GetModule("Item")
 
 ---@class RCVotingFrame : AceModule
 local RCVotingFrame = RCReadyCheck.RC:GetModule("RCVotingFrame")
@@ -41,8 +42,15 @@ function VotingFrame:GetTodayAwardedItemsForPlayer(playerName, realmName)
     local historyDBEntry = historyDB[key]
     if not historyDBEntry then return awardedItems end
     for _, entry in ipairs(historyDBEntry) do
-        if entry.date == date("%Y/%m/%d") then
-            table.insert(awardedItems, entry)
+        if entry.date == date("%Y/%m/%d") and type(entry.responseID) == 'number' then
+            local itemDifficulty = Item:GetItemDifficultyID(entry.lootWon)
+            table.insert(awardedItems, {
+                difficultyID = itemDifficulty,
+                lootWon = entry.lootWon,
+                response = entry.response,
+                note = entry.note,
+                date = entry.date,
+            })
         end
     end
     return awardedItems
