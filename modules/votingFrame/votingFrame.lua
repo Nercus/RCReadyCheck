@@ -110,7 +110,8 @@ function VotingFrame:UpdateVotingFrameEntry(frame, characterName, lootEntry)
             GameTooltip:AddLine(string.format("%s Note: %s", iconNote, lootEntry.note))
         end
         if lootEntry.absoluteGain then
-            GameTooltip:AddLine(string.format("%s Absolute Gain: %s", upgradeIcon, lootEntry.absoluteGain))
+            GameTooltip:AddLine(string.format("%s Absolute Gain: %s", upgradeIcon,
+                AbbreviateNumbers(lootEntry.absoluteGain)))
         end
         if lootEntry.relativeGain then
             GameTooltip:AddLine(string.format("%s Relative Gain: %.2f%%", upgradeIcon, lootEntry.relativeGain * 100))
