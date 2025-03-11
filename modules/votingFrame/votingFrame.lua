@@ -21,6 +21,48 @@ local difficultyTable = {
     [6] = "MYTHIC",
 }
 
+
+---@param dateString string dateNow in the form of "YYYY/MM/DD"
+---@return boolean
+local function isDateOnWeekOld(dateString)
+    local dateParts = { string.split("/", dateString) }
+    local year = tonumber(dateParts[1])
+    local month = tonumber(dateParts[2])
+    local day = tonumber(dateParts[3])
+    local dateNow = date("*t")
+
+    local sameYear = dateNow.year == year
+    local sameMonth = dateNow.month == month
+
+    -- check if the dateNow.day - day is greater than 7
+    if dateNow.day - day > 8 and sameYear and sameMonth then
+        return false
+    end
+
+    -- if dateNow.day - day is less than 0, then we need to check if the month is one less
+    -- if that is the case check if the days left in the month + dateNow.day is greater than 7
+    if (dateNow.day - day < 0 and sameYear and dateNow.month - month == 1) then
+        local daysLeftInMonth = 30 - day -- we assume all months have 30 days for simplicity
+        if daysLeftInMonth + dateNow.day > 8 then
+            return false
+        end
+    end
+
+    if (dateNow.year - year < 0 and dateNow.month - month == -11) then
+        local daysLeftInMonth = 30 - day -- we assume all months have 30 days for simplicity
+        if daysLeftInMonth + dateNow.day > 8 then
+            return false
+        end
+    end
+
+    if (not sameYear and not sameMonth) or (sameYear and not sameMonth) then
+        return false
+    end
+
+    return true
+end
+
+
 ---@class HistoryEntry
 ---@field date string date in the form of "YYYY/MM/DD"
 ---@field difficultyID number difficulty of the raid
@@ -42,7 +84,7 @@ function VotingFrame:GetTodayAwardedItemsForPlayer(playerName, realmName)
     local historyDBEntry = historyDB[key]
     if not historyDBEntry then return awardedItems end
     for _, entry in ipairs(historyDBEntry) do
-        if entry.date == date("%Y/%m/%d") and type(entry.responseID) == 'number' then
+        if isDateOnWeekOld(entry.date) and type(entry.responseID) == 'number' then
             local itemDifficulty = Item:GetItemDifficultyID(entry.lootWon)
             table.insert(awardedItems, {
                 difficultyID = itemDifficulty,
@@ -67,12 +109,9 @@ local function GetAwardedItemString(entry)
     if entry.difficultyID then
         difficultyName = GetDifficultyInfo(entry.difficultyID)
     end
-    return string.format("- %s %s %s %s", difficultyName or "", entry.lootWon or "", entry.response or "",
-        entry.note or "")
+    return string.format("- %s %s %s %s (%s)", difficultyName or "", entry.lootWon or "", entry.response or "",
+        entry.note or "", entry.date)
 end
-
-
-
 
 ---@param frame Frame
 ---@param characterName? string
