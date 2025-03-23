@@ -23,7 +23,7 @@ local difficultyTable = {
 
 
 ---@param dateString string dateNow in the form of "YYYY/MM/DD"
----@return boolean | string formattedDateString returns "x days old" if the date is older than 7 days else false
+---@return boolean | string formattedDateString returns "x days ago" if the date is older than 7 days else false
 local function getFormattedDateString(dateString)
     local dateParts = { string.split("/", dateString) }
     local year = tonumber(dateParts[1])
@@ -40,32 +40,32 @@ local function getFormattedDateString(dateString)
         daysInMonth[2] = 29
     end
 
-    local daysOld = 0
+    local daysAgo = 0
 
     -- Calculate days difference within the same year
     if year == dateNow.year then
         if month == dateNow.month then
-            daysOld = dateNow.day - day
+            daysAgo = dateNow.day - day
         else
-            daysOld = daysInMonth[month] - day + dateNow.day
+            daysAgo = daysInMonth[month] - day + dateNow.day
             for m = month + 1, dateNow.month - 1 do
-                daysOld = daysOld + daysInMonth[m]
+                daysAgo = daysAgo + daysInMonth[m]
             end
         end
     elseif year < dateNow.year then
         -- Calculate days difference across years
-        daysOld = daysInMonth[month] - day + dateNow.day
+        daysAgo = daysInMonth[month] - day + dateNow.day
         for m = month + 1, 12 do
-            daysOld = daysOld + daysInMonth[m]
+            daysAgo = daysAgo + daysInMonth[m]
         end
         for m = 1, dateNow.month - 1 do
-            daysOld = daysOld + daysInMonth[m]
+            daysAgo = daysAgo + daysInMonth[m]
         end
-        daysOld = daysOld + (dateNow.year - year - 1) * 365
+        daysAgo = daysAgo + (dateNow.year - year - 1) * 365
     end
 
-    if daysOld < 10 then
-        return string.format("%d days ago", daysOld)
+    if daysAgo < 10 then
+        return daysAgo > 1 and string.format("%d days ago", daysAgo) or "1 day ago"
     else
         return false
     end
