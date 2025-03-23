@@ -8,6 +8,7 @@ local RCReadyCheck = LibStub("NercLib"):GetAddon(AddOnName)
 local VotingFrame = RCReadyCheck:GetModule("VotingFrame")
 local Database = RCReadyCheck:GetModule("Database")
 local Item = RCReadyCheck:GetModule("Item")
+local Text = RCReadyCheck:GetModule("Text")
 
 ---@class RCVotingFrame : AceModule
 local RCVotingFrame = RCReadyCheck.RC:GetModule("RCVotingFrame")
@@ -21,6 +22,15 @@ local difficultyTable = {
     [6] = "MYTHIC",
 }
 
+
+local RESPONSE_COLOR = {
+    ["Best in slot"] = CreateColorFromHexString("FF0AFF00"),
+    ["Catalyst"] = CreateColorFromHexString("FF00C29E"),
+    ["Upgrade"] = CreateColorFromHexString("FFFF00ED"),
+    ["Off Spec (raid)"] = CreateColorFromHexString("FFFF0073"),
+    ["Tertiary / Non-Raid"] = CreateColorFromHexString("FF0042FF"),
+    ["Transmog"] = CreateColorFromHexString("FFFFFFFF"),
+}
 
 ---@param dateString string dateNow in the form of "YYYY/MM/DD"
 ---@return boolean | string formattedDateString returns "x days ago" if the date is older than 7 days else false
@@ -156,6 +166,9 @@ function VotingFrame:UpdateVotingFrameEntry(frame, characterName, lootEntry)
     local relativeGain = (lootEntry.relativeGain and string.format("(%.2f%%)", lootEntry.relativeGain * 100)) or ""
     local noteIcon = (lootEntry.note and string.format("[%s]", iconNote)) or ""
     local frameText = string.format("%s %s %s %s", upgradeIcon, lootEntry.selection, relativeGain, noteIcon)
+    local color = RESPONSE_COLOR[lootEntry.selection] or RESPONSE_COLOR["Transmog"]
+    RCReadyCheck:GetModule("Debug"):Debug(color)
+    frameText = Text:WrapTextInColor(frameText, color)
     frame.text:SetText(frameText)
 
     frame:SetScript("OnEnter", function(self)
