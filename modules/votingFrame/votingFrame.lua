@@ -23,43 +23,52 @@ local difficultyTable = {
 
 
 ---@param dateString string dateNow in the form of "YYYY/MM/DD"
----@return boolean
-local function isDateOnWeekOld(dateString)
+---@return boolean | string formattedDateString returns "x days old" if the date is older than 7 days else false
+local function getFormattedDateString(dateString)
     local dateParts = { string.split("/", dateString) }
     local year = tonumber(dateParts[1])
     local month = tonumber(dateParts[2])
     local day = tonumber(dateParts[3])
     local dateNow = date("*t")
 
-    local sameYear = dateNow.year == year
-    local sameMonth = dateNow.month == month
+    local daysInMonth = {
+        31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+    }
 
-    -- check if the dateNow.day - day is greater than 7
-    if dateNow.day - day > 8 and sameYear and sameMonth then
+    -- Adjust for leap year
+    if (dateNow.year % 4 == 0 and dateNow.year % 100 ~= 0) or (dateNow.year % 400 == 0) then
+        daysInMonth[2] = 29
+    end
+
+    local daysOld = 0
+
+    -- Calculate days difference within the same year
+    if year == dateNow.year then
+        if month == dateNow.month then
+            daysOld = dateNow.day - day
+        else
+            daysOld = daysInMonth[month] - day + dateNow.day
+            for m = month + 1, dateNow.month - 1 do
+                daysOld = daysOld + daysInMonth[m]
+            end
+        end
+    elseif year < dateNow.year then
+        -- Calculate days difference across years
+        daysOld = daysInMonth[month] - day + dateNow.day
+        for m = month + 1, 12 do
+            daysOld = daysOld + daysInMonth[m]
+        end
+        for m = 1, dateNow.month - 1 do
+            daysOld = daysOld + daysInMonth[m]
+        end
+        daysOld = daysOld + (dateNow.year - year - 1) * 365
+    end
+
+    if daysOld < 10 then
+        return string.format("%d days ago", daysOld)
+    else
         return false
     end
-
-    -- if dateNow.day - day is less than 0, then we need to check if the month is one less
-    -- if that is the case check if the days left in the month + dateNow.day is greater than 7
-    if (dateNow.day - day < 0 and sameYear and dateNow.month - month == 1) then
-        local daysLeftInMonth = 30 - day -- we assume all months have 30 days for simplicity
-        if daysLeftInMonth + dateNow.day > 8 then
-            return false
-        end
-    end
-
-    if (dateNow.year - year < 0 and dateNow.month - month == -11) then
-        local daysLeftInMonth = 30 - day -- we assume all months have 30 days for simplicity
-        if daysLeftInMonth + dateNow.day > 8 then
-            return false
-        end
-    end
-
-    if (not sameYear and not sameMonth) or (sameYear and not sameMonth) then
-        return false
-    end
-
-    return true
 end
 
 
@@ -71,7 +80,14 @@ end
 ---@field lootWon string hyperlink of the item
 ---@field responseID string
 
-function VotingFrame:GetTodayAwardedItemsForPlayer(playerName, realmName)
+
+local ALLOWED_RESPONSES = {
+    [1] = true,
+    [2] = true,
+    [3] = true,
+}
+
+function VotingFrame:GetAwardedItemsForPlayer(playerName, realmName)
     local awardedItems = {}
     ---@type table<string, HistoryEntry>
     local historyDB = RCReadyCheck.RC:GetHistoryDB()
@@ -84,14 +100,14 @@ function VotingFrame:GetTodayAwardedItemsForPlayer(playerName, realmName)
     local historyDBEntry = historyDB[key]
     if not historyDBEntry then return awardedItems end
     for _, entry in ipairs(historyDBEntry) do
-        if isDateOnWeekOld(entry.date) and type(entry.responseID) == 'number' then
+        if getFormattedDateString(entry.date) and type(entry.responseID) == 'number' and ALLOWED_RESPONSES[entry.responseID] then
             local itemDifficulty = Item:GetItemDifficultyID(entry.lootWon)
             table.insert(awardedItems, {
                 difficultyID = itemDifficulty,
                 lootWon = entry.lootWon,
                 response = entry.response,
                 note = entry.note,
-                date = entry.date,
+                date = getFormattedDateString(entry.date)
             })
         end
     end
@@ -121,7 +137,7 @@ function VotingFrame:UpdateVotingFrameEntry(frame, characterName, lootEntry)
         frame.text:SetText("-")
         frame:SetScript("OnEnter", function(self)
             GameTooltip:SetOwner(self, "ANCHOR_CURSOR_RIGHT")
-            local awardedItems = VotingFrame:GetTodayAwardedItemsForPlayer(characterName)
+            local awardedItems = VotingFrame:GetAwardedItemsForPlayer(characterName)
             if #awardedItems > 0 then
                 -- add a separator line if there are awarded items
                 GameTooltip:AddLine(CreateAtlasMarkup("RecipeList-Divider", 272, 6))
@@ -155,7 +171,7 @@ function VotingFrame:UpdateVotingFrameEntry(frame, characterName, lootEntry)
         if lootEntry.relativeGain then
             GameTooltip:AddLine(string.format("%s Relative Gain: %.2f%%", upgradeIcon, lootEntry.relativeGain * 100))
         end
-        local awardedItems = VotingFrame:GetTodayAwardedItemsForPlayer(lootEntry.characterName, lootEntry.characterRealm)
+        local awardedItems = VotingFrame:GetAwardedItemsForPlayer(lootEntry.characterName, lootEntry.characterRealm)
         if #awardedItems > 0 then
             -- add a separator line if there are awarded items
             GameTooltip:AddLine(CreateAtlasMarkup("RecipeList-Divider", 272, 6))
