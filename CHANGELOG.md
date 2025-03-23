@@ -1,4 +1,4 @@
 
-- Extend loot history to show the last 8 days
-- Add the date to loot history entries
-- Abbreviate absolute gains
+- Set selection color to use the same as the ingame selection
+- Hide Transmog from history
+- Show "days ago" instead of date
