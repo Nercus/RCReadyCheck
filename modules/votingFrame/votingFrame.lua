@@ -167,7 +167,6 @@ function VotingFrame:UpdateVotingFrameEntry(frame, characterName, lootEntry)
     local noteIcon = (lootEntry.note and string.format("[%s]", iconNote)) or ""
     local frameText = string.format("%s %s %s %s", upgradeIcon, lootEntry.selection, relativeGain, noteIcon)
     local color = RESPONSE_COLOR[lootEntry.selection] or RESPONSE_COLOR["Transmog"]
-    RCReadyCheck:GetModule("Debug"):Debug(color)
     frameText = Text:WrapTextInColor(frameText, color)
     frame.text:SetText(frameText)
 
