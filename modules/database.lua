@@ -5,7 +5,7 @@ local AddOnName = ...
 local RCReadyCheck = LibStub("NercLib"):GetAddon(AddOnName)
 
 ---@class Database
----@field db table<string, table<DIFFICULTY, table<number, ImportDataEntry>>>
+---@field db table<string, table<number, ImportDataEntry>>
 local Database = RCReadyCheck:GetModule("Database")
 local SavedVars = RCReadyCheck:GetModule("SavedVars")
 local Events = RCReadyCheck:GetModule("Events")
@@ -13,13 +13,11 @@ local Text = RCReadyCheck:GetModule("Text")
 
 Database.db = {}
 
----@alias DIFFICULTY "NORMAL" | "HEROIC" | "MYTHIC"
 
 ---@class ImportDataEntry
 ---@field wowItemId? string
 ---@field characterName? string
 ---@field characterRealm? string
----@field difficulty? DIFFICULTY
 ---@field selection? string
 ---@field absoluteGain? number
 ---@field relativeGain? number
@@ -29,7 +27,6 @@ Database.db = {}
 local REQUIRED_FIELDS = {
     "wowItemId",
     "characterName",
-    "difficulty",
     "selection",
 }
 
@@ -48,11 +45,9 @@ function Database:SetDataEntry(entry)
         error("Invalid wowItemId: " .. entry.wowItemId)
     end
 
-    local difficultyKey = entry.difficulty
-    if difficultyKey then
-        self.db[key][difficultyKey] = self.db[key][difficultyKey] or {}
-        self.db[key][difficultyKey][itemKey] = entry
-    end
+
+    self.db[key] = self.db[key] or {}
+    self.db[key][itemKey] = entry
 end
 
 ---@param data ImportDataEntry[]
@@ -65,19 +60,18 @@ function Database:SetBulkData(data)
     SavedVars:SetVar("lastImport", time() - 60 * 60) -- subtract 1 hour to prevent warning on first import
 end
 
-function Database:GetEntry(characterName, difficulty, wowItemId)
+function Database:GetEntry(characterName, wowItemId)
     assert(characterName, "characterName is required")
-    assert(difficulty, "difficulty is required")
     assert(wowItemId, "wowItemId is required")
     ---@type string
     local key = characterName
     if not self.db[key] then
         return nil
     end
-    if not self.db[key][difficulty] then
+    if not self.db[key] then
         return nil
     end
-    return self.db[key][difficulty][wowItemId]
+    return self.db[key][wowItemId]
 end
 
 function Database:RestoreDB()

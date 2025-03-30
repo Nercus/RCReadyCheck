@@ -15,14 +15,6 @@ local RCVotingFrame = RCReadyCheck.RC:GetModule("RCVotingFrame")
 
 local session = 1
 
----@type table<number, DIFFICULTY>
-local difficultyTable = {
-    [4] = "NORMAL",
-    [5] = "HEROIC",
-    [6] = "MYTHIC",
-}
-
-
 local RESPONSE_COLOR = {
     ["Best in slot"] = CreateColorFromHexString("FF0AFF00"),
     ["Catalyst"] = CreateColorFromHexString("FF00C29E"),
@@ -33,7 +25,7 @@ local RESPONSE_COLOR = {
 }
 
 ---@param dateString string dateNow in the form of "YYYY/MM/DD"
----@return boolean | string formattedDateString returns "x days ago" if the date is older than 7 days else false
+---@return boolean | string formattedDateString returns "x days ago" if the date is older than 10 days, otherwise false
 local function getFormattedDateString(dateString)
     local dateParts = { string.split("/", dateString) }
     local year = tonumber(dateParts[1])
@@ -84,7 +76,6 @@ end
 
 ---@class HistoryEntry
 ---@field date string date in the form of "YYYY/MM/DD"
----@field difficultyID number difficulty of the raid
 ---@field note string? note for the item
 ---@field response string response of the player (e.g. "BiS - I want that item")
 ---@field lootWon string hyperlink of the item
@@ -111,9 +102,7 @@ function VotingFrame:GetAwardedItemsForPlayer(playerName, realmName)
     if not historyDBEntry then return awardedItems end
     for _, entry in ipairs(historyDBEntry) do
         if getFormattedDateString(entry.date) and type(entry.responseID) == 'number' and ALLOWED_RESPONSES[entry.responseID] then
-            local itemDifficulty = Item:GetItemDifficultyID(entry.lootWon)
             table.insert(awardedItems, {
-                difficultyID = itemDifficulty,
                 lootWon = entry.lootWon,
                 response = entry.response,
                 note = entry.note,
@@ -132,37 +121,43 @@ local iconDowngrade = string.format("|T%s:12:12|t", "Interface/AddOns/RCReadyChe
 ---@return string
 local function GetAwardedItemString(entry)
     local difficultyName
-    if entry.difficultyID then
-        difficultyName = GetDifficultyInfo(entry.difficultyID)
+    local difficultyID = Item:GetItemDifficultyID(entry.lootWon)
+    if difficultyID then
+        difficultyName = GetDifficultyInfo(difficultyID)
     end
     return string.format("- %s %s %s %s (%s)", difficultyName or "", entry.lootWon or "", entry.response or "",
         entry.note or "", entry.date)
 end
 
----@param frame Frame
----@param characterName? string
----@param lootEntry? ImportDataEntry
+---@param characterName string name of the character
+local function AddAwardedItemsToTooltip(characterName)
+    local awardedItems = VotingFrame:GetAwardedItemsForPlayer(characterName)
+    if #awardedItems > 0 then
+        local header = string.format("Awarded %d Item%s last 10 days:", #awardedItems,
+            ((#awardedItems > 1) and "s" or ""))
+        GameTooltip:AddLine(CreateAtlasMarkup("RecipeList-Divider", 272, 6))
+        GameTooltip:AddLine(header)
+        for _, entry in ipairs(awardedItems) do
+            GameTooltip:AddLine(GetAwardedItemString(entry))
+        end
+    else
+        GameTooltip:AddLine("No items awarded in the last 10 days.")
+    end
+end
+
 function VotingFrame:UpdateVotingFrameEntry(frame, characterName, lootEntry)
     if not lootEntry then
         frame.text:SetText("-")
         frame:SetScript("OnEnter", function(self)
             GameTooltip:SetOwner(self, "ANCHOR_CURSOR_RIGHT")
-            local awardedItems = VotingFrame:GetAwardedItemsForPlayer(characterName)
-            if #awardedItems > 0 then
-                -- add a separator line if there are awarded items
-                GameTooltip:AddLine(CreateAtlasMarkup("RecipeList-Divider", 272, 6))
-                GameTooltip:AddLine("Awarded Items:")
-                for _, entry in ipairs(awardedItems) do
-                    GameTooltip:AddLine(GetAwardedItemString(entry))
-                end
-            end
+            AddAwardedItemsToTooltip(characterName)
             GameTooltip:Show()
         end)
         return
     end
 
-
-    local upgradeIcon = (lootEntry.absoluteGain and (lootEntry.absoluteGain > 0 and iconUpgrade or iconDowngrade)) or ""
+    local upgradeIcon = (lootEntry.absoluteGain and
+        (lootEntry.absoluteGain > 0 and iconUpgrade or iconDowngrade)) or ""
     local relativeGain = (lootEntry.relativeGain and string.format("(%.2f%%)", lootEntry.relativeGain * 100)) or ""
     local noteIcon = (lootEntry.note and string.format("[%s]", iconNote)) or ""
     local frameText = string.format("%s %s %s %s", upgradeIcon, lootEntry.selection, relativeGain, noteIcon)
@@ -183,15 +178,7 @@ function VotingFrame:UpdateVotingFrameEntry(frame, characterName, lootEntry)
         if lootEntry.relativeGain then
             GameTooltip:AddLine(string.format("%s Relative Gain: %.2f%%", upgradeIcon, lootEntry.relativeGain * 100))
         end
-        local awardedItems = VotingFrame:GetAwardedItemsForPlayer(lootEntry.characterName, lootEntry.characterRealm)
-        if #awardedItems > 0 then
-            -- add a separator line if there are awarded items
-            GameTooltip:AddLine(CreateAtlasMarkup("RecipeList-Divider", 272, 6))
-            GameTooltip:AddLine("Awarded Items:")
-            for _, entry in ipairs(awardedItems) do
-                GameTooltip:AddLine(GetAwardedItemString(entry))
-            end
-        end
+        AddAwardedItemsToTooltip(characterName)
         GameTooltip:Show()
     end)
     frame:SetScript("OnLeave", function()
@@ -205,13 +192,7 @@ function VotingFrame:SetCellValue(frame, data, _, _, realrow, column)
     if lootTable and lootTable[session] then
         local itemLink = lootTable[session].link
         -- generate a table from the itemLink by splitting on :
-        local itemTable = { string.split(":", itemLink) }
-        local difficulty = difficultyTable[tonumber(itemTable[13])]
-        if (not difficulty) then
-            VotingFrame:UpdateVotingFrameEntry(frame, data[realrow].name)
-            return
-        end
-        local dataEntry = Database:GetEntry(data[realrow].name, difficulty, lootTable[session].itemID)
+        local dataEntry = Database:GetEntry(data[realrow].name, lootTable[session].itemID)
         if not dataEntry then
             VotingFrame:UpdateVotingFrameEntry(frame, data[realrow].name)
             return
