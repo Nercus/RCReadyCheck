@@ -64,7 +64,6 @@ end
 function Database:GetEntry(characterName, wowItemId)
     assert(characterName, "characterName is required")
     assert(wowItemId, "wowItemId is required")
-    RCReadyCheck:GetModule("Debug"):Debug({ characterName, wowItemId, self.db })
     ---@type string
     local key = characterName
     if not self.db[key] then
