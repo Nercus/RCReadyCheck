@@ -1,2 +1,2 @@
-- Remove difficulty handling
-- Show count of total awarded items
+- Fix bug with raiders on other realms
+- Extend time span for loot history to 14 days
