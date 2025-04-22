@@ -190,8 +190,6 @@ function VotingFrame:SetCellValue(frame, data, _, _, realrow, column)
     ---@type table <string, any>
     local lootTable = RCReadyCheck.RC:GetLootTable()
     if lootTable and lootTable[session] then
-        local itemLink = lootTable[session].link
-        -- generate a table from the itemLink by splitting on :
         local dataEntry = Database:GetEntry(data[realrow].name, lootTable[session].itemID)
         if not dataEntry then
             VotingFrame:UpdateVotingFrameEntry(frame, data[realrow].name)

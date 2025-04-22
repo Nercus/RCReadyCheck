@@ -37,7 +37,8 @@ function Database:SetDataEntry(entry)
             error("Missing required field: " .. field)
         end
     end
-    local key = entry.characterName .. "-" .. entry.characterRealm
+    local realmName = (entry.characterRealm):gsub(" ", "")
+    local key = entry.characterName .. "-" .. realmName
     self.db[key] = self.db[key] or {}
 
     local itemKey = tonumber(entry.wowItemId)
@@ -63,6 +64,7 @@ end
 function Database:GetEntry(characterName, wowItemId)
     assert(characterName, "characterName is required")
     assert(wowItemId, "wowItemId is required")
+    RCReadyCheck:GetModule("Debug"):Debug({ characterName, wowItemId, self.db })
     ---@type string
     local key = characterName
     if not self.db[key] then

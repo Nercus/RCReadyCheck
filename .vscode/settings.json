@@ -81,6 +81,6 @@
     "Lua.workspace.library": [
         "~\\Documents\\FramexmlAnnotations",
         "libs\\NercLib",
-        "~\\.vscode\\extensions\\ketho.wow-api-0.18.2\\Annotations"
+        "~\\.vscode\\extensions\\ketho.wow-api-0.20.6\\Annotations\\Core"
     ],
 }
