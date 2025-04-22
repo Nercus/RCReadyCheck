@@ -25,7 +25,7 @@ local RESPONSE_COLOR = {
 }
 
 ---@param dateString string dateNow in the form of "YYYY/MM/DD"
----@return boolean | string formattedDateString returns "x days ago" if the date is older than 10 days, otherwise false
+---@return boolean | string formattedDateString returns "x days ago" if the date is older than 15 days, otherwise false
 local function getFormattedDateString(dateString)
     local dateParts = { string.split("/", dateString) }
     local year = tonumber(dateParts[1])
@@ -66,7 +66,7 @@ local function getFormattedDateString(dateString)
         daysAgo = daysAgo + (dateNow.year - year - 1) * 365
     end
 
-    if daysAgo < 10 then
+    if daysAgo < 15 then
         return daysAgo > 1 and string.format("%d days ago", daysAgo) or "1 day ago"
     else
         return false
@@ -133,7 +133,7 @@ end
 local function AddAwardedItemsToTooltip(characterName)
     local awardedItems = VotingFrame:GetAwardedItemsForPlayer(characterName)
     if #awardedItems > 0 then
-        local header = string.format("Awarded %d Item%s last 10 days:", #awardedItems,
+        local header = string.format("Awarded %d Item%s last 14 days:", #awardedItems,
             ((#awardedItems > 1) and "s" or ""))
         GameTooltip:AddLine(CreateAtlasMarkup("RecipeList-Divider", 272, 6))
         GameTooltip:AddLine(header)
@@ -141,7 +141,7 @@ local function AddAwardedItemsToTooltip(characterName)
             GameTooltip:AddLine(GetAwardedItemString(entry))
         end
     else
-        GameTooltip:AddLine("No items awarded in the last 10 days.")
+        GameTooltip:AddLine("No items awarded in the last 14 days.")
     end
 end
 
