@@ -2,7 +2,7 @@ package-as: RCReadyCheck
 
 externals:
   libs/LibStub: https://repos.wowace.com/wow/libstub/trunk
-  libs/NercLib: https://github.com/Nercus/NercLib
+  libs/NercUtils: https://github.com/Nercus/NercUtils
 
 enable-nolib-creation: no
 
@@ -12,7 +12,7 @@ ignore:
 
 required-dependencies:
   - libstub
-  - nerclib
+  - nercutils
 
 manual-changelog:
   filename: CHANGELOG.md

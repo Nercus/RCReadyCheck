@@ -1,8 +1,5 @@
----@type string
-local AddOnName = ...
-
----@class RCReadyCheck : NercLibAddon
-local RCReadyCheck = LibStub("NercLib"):GetAddon(AddOnName)
+---@class RCReadyCheck : NercUtilsAddon
+local RCReadyCheck = LibStub("NercUtils"):GetAddon(...)
 
 ---@class Item
 local Item = RCReadyCheck:GetModule("Item")

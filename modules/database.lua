@@ -1,15 +1,9 @@
----@type string
-local AddOnName = ...
-
----@class RCReadyCheck : NercLibAddon
-local RCReadyCheck = LibStub("NercLib"):GetAddon(AddOnName)
+---@class RCReadyCheck : NercUtilsAddon
+local RCReadyCheck = LibStub("NercUtils"):GetAddon(...)
 
 ---@class Database
 ---@field db table<string, table<number, ImportDataEntry>>
 local Database = RCReadyCheck:GetModule("Database")
-local SavedVars = RCReadyCheck:GetModule("SavedVars")
-local Events = RCReadyCheck:GetModule("Events")
-local Text = RCReadyCheck:GetModule("Text")
 
 Database.db = {}
 
@@ -57,8 +51,8 @@ function Database:SetBulkData(data)
     for _, entry in ipairs(data) do
         self:SetDataEntry(entry)
     end
-    SavedVars:SetVar("importedData", self.db)
-    SavedVars:SetVar("lastImport", time() - 60 * 60) -- subtract 1 hour to prevent warning on first import
+    RCReadyCheck:SetVar("importedData", self.db)
+    RCReadyCheck:SetVar("lastImport", time() - 60 * 60) -- subtract 1 hour to prevent warning on first import
 end
 
 function Database:GetEntry(characterName, wowItemId)
@@ -76,7 +70,7 @@ function Database:GetEntry(characterName, wowItemId)
 end
 
 function Database:RestoreDB()
-    local db = SavedVars:GetVar("importedData")
+    local db = RCReadyCheck:GetVar("importedData")
     if db then
         self.db = db --[[@as table]]
     end
@@ -85,22 +79,23 @@ end
 local TIME_UNTIL_WARNING = (60 * 60 * 24 * 7)
 
 function Database:ShowOutdatedDBWarning()
-    local lastImport = SavedVars:GetVar("lastImport")
+    local lastImport = RCReadyCheck:GetVar("lastImport")
     if not lastImport then
         return
     end
     local diff = time() - lastImport
     if diff > TIME_UNTIL_WARNING then
-        Text:Print(Text:WrapTextInColor("The imported data is outdated. Please import new data.", ERROR_COLOR))
+        RCReadyCheck:Print(RCReadyCheck:WrapTextInColor("The imported data is outdated. Please import new data.",
+            ERROR_COLOR))
         UIErrorsFrame:AddMessage("RCReadyCheck: The imported data is outdated. Please import new data.",
             ERROR_COLOR:GetRGBA() --[[@as number]])
     end
 end
 
-Events:RegisterEvent("PLAYER_LOGIN", function()
+RCReadyCheck:RegisterEvent("PLAYER_LOGIN", function()
     Database:RestoreDB()
 end)
 
-Events:RegisterEvent("PLAYER_ENTERING_WORLD", function()
+RCReadyCheck:RegisterEvent("PLAYER_ENTERING_WORLD", function()
     Database:ShowOutdatedDBWarning()
 end)

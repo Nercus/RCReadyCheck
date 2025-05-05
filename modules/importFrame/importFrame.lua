@@ -1,8 +1,5 @@
----@type string
-local AddOnName = ...
-
----@class RCReadyCheck : NercLibAddon
-local RCReadyCheck = LibStub("NercLib"):GetAddon(AddOnName)
+---@class RCReadyCheck : NercUtilsAddon
+local RCReadyCheck = LibStub("NercUtils"):GetAddon(...)
 
 ---@class ImportFrame
 local ImportFrame = RCReadyCheck:GetModule("ImportFrame")
@@ -85,7 +82,6 @@ function ImportFrame:ToggleImportFrame()
     end
 end
 
-local SlashCommand = RCReadyCheck:GetModule("SlashCommand")
-SlashCommand:AddSlashCommand("import", function()
+RCReadyCheck:AddSlashCommand("import", function()
     ImportFrame:ToggleImportFrame()
 end, "Open the import frame")

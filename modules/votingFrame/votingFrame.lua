@@ -1,14 +1,10 @@
----@diagnostic disable: no-unknown, undefined-field
----@type string
-local AddOnName = ...
+---@class RCReadyCheck : NercUtilsAddon
+local RCReadyCheck = LibStub("NercUtils"):GetAddon(...)
 
----@class RCReadyCheck : NercLibAddon
-local RCReadyCheck = LibStub("NercLib"):GetAddon(AddOnName)
 ---@class VotingFrame
 local VotingFrame = RCReadyCheck:GetModule("VotingFrame")
 local Database = RCReadyCheck:GetModule("Database")
 local Item = RCReadyCheck:GetModule("Item")
-local Text = RCReadyCheck:GetModule("Text")
 
 ---@class RCVotingFrame : AceModule
 local RCVotingFrame = RCReadyCheck.RC:GetModule("RCVotingFrame")
@@ -33,6 +29,7 @@ local function getFormattedDateString(dateString)
     local day = tonumber(dateParts[3])
     local dateNow = date("*t")
 
+    ---@type number[]
     local daysInMonth = {
         31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
     }
@@ -42,6 +39,7 @@ local function getFormattedDateString(dateString)
         daysInMonth[2] = 29
     end
 
+    ---@type number
     local daysAgo = 0
 
     -- Calculate days difference within the same year
@@ -61,8 +59,10 @@ local function getFormattedDateString(dateString)
             daysAgo = daysAgo + daysInMonth[m]
         end
         for m = 1, dateNow.month - 1 do
+            ---@type number
             daysAgo = daysAgo + daysInMonth[m]
         end
+        ---@type number
         daysAgo = daysAgo + (dateNow.year - year - 1) * 365
     end
 
@@ -88,9 +88,12 @@ local ALLOWED_RESPONSES = {
     [3] = true,
 }
 
+---@param playerName string
+---@param realmName string?
+---@return {lootWon: string, response:string, note: string, date: string}[] awardedItems
 function VotingFrame:GetAwardedItemsForPlayer(playerName, realmName)
     local awardedItems = {}
-    ---@type table<string, HistoryEntry>
+    ---@type table<string, HistoryEntry[]>
     local historyDB = RCReadyCheck.RC:GetHistoryDB()
     if not historyDB then return awardedItems end
     ---@type string
@@ -120,6 +123,7 @@ local iconDowngrade = string.format("|T%s:12:12|t", "Interface/AddOns/RCReadyChe
 ---@param entry HistoryEntry
 ---@return string
 local function GetAwardedItemString(entry)
+    ---@type string
     local difficultyName
     local difficultyID = Item:GetItemDifficultyID(entry.lootWon)
     if difficultyID then
@@ -162,7 +166,7 @@ function VotingFrame:UpdateVotingFrameEntry(frame, characterName, lootEntry)
     local noteIcon = (lootEntry.note and string.format("[%s]", iconNote)) or ""
     local frameText = string.format("%s %s %s %s", upgradeIcon, lootEntry.selection, relativeGain, noteIcon)
     local color = RESPONSE_COLOR[lootEntry.selection] or RESPONSE_COLOR["Transmog"]
-    frameText = Text:WrapTextInColor(frameText, color)
+    frameText = RCReadyCheck:WrapTextInColor(frameText, color)
     frame.text:SetText(frameText)
 
     frame:SetScript("OnEnter", function(self)
@@ -197,18 +201,21 @@ function VotingFrame:SetCellValue(frame, data, _, _, realrow, column)
         end
         VotingFrame:UpdateVotingFrameEntry(frame, data[realrow].name, dataEntry)
     end
+    ---@diagnostic disable-next-line: no-unknown
     data[realrow].cols[column].value = "BiS - I want that item"
 end
 
 function VotingFrame:UpdateSortNext()
     for index in ipairs(RCVotingFrame.scrollCols) do
         if RCVotingFrame.scrollCols[index].sortnext then
+            ---@type boolean
             local exists = RCVotingFrame:GetColumnIndexFromName(self.sortnext[RCVotingFrame.scrollCols[index].colName])
+            ---@diagnostic disable-next-line: no-unknown
             RCVotingFrame.scrollCols[index].sortnext = exists
         end
     end
 
-    local frame = RCVotingFrame:GetFrame()
+    local frame = RCVotingFrame:GetFrame() --[[@as RCVotingFrame]]
     if frame then
         frame.st:SetDisplayCols(RCVotingFrame.scrollCols)
         frame:SetWidth(frame.st.frame:GetWidth() + 20)
@@ -229,8 +236,10 @@ function VotingFrame:AddReadyCheckColumn()
 
     -- Translate sortnext into colNames (copied from RCLootCouncil_ExtraUtilities)
     self.sortnext = {}
+    ---@diagnostic disable-next-line: no-unknown
     for _, v in ipairs(RCVotingFrame.scrollCols) do
         if v.sortnext then
+            ---@diagnostic disable-next-line: no-unknown
             self.sortnext[v.colName] = RCVotingFrame.scrollCols[v.sortnext].colName
         end
     end
@@ -246,21 +255,21 @@ function VotingFrame:AddReadyCheckColumn()
     added = true
 end
 
-local Utils = RCReadyCheck:GetModule("Utils")
-local debouncedOutdateWarning = Utils:DebounceChange(function()
+local debouncedOutdateWarning = RCReadyCheck:DebounceChange(function()
     Database:ShowOutdatedDBWarning()
 end, 1)
 
 function VotingFrame:OnMessageReceived(msg, ...)
     if msg == "RCSessionChangedPre" then
+        ---@diagnostic disable-next-line: no-unknown
         local s = unpack({ ... })
+        ---@diagnostic disable-next-line: no-unknown
         session = s
     end
     debouncedOutdateWarning()
 end
 
-local Events = RCReadyCheck:GetModule("Events")
-Events:RegisterEvent("PLAYER_ENTERING_WORLD", function()
+RCReadyCheck:RegisterEvent("PLAYER_ENTERING_WORLD", function()
     VotingFrame:AddReadyCheckColumn()
 end)
 

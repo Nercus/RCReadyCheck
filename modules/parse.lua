@@ -1,9 +1,5 @@
----@diagnostic disable: no-unknown
----@type string
-local AddOnName = ...
-
----@class RCReadyCheck : NercLibAddon
-local RCReadyCheck = LibStub("NercLib"):GetAddon(AddOnName)
+---@class RCReadyCheck : NercUtilsAddon
+local RCReadyCheck = LibStub("NercUtils"):GetAddon(...)
 
 ---@class JSON
 local JSON = RCReadyCheck:GetModule("JSON")
@@ -40,6 +36,7 @@ local JSON = RCReadyCheck:GetModule("JSON")
 -- Encode
 -------------------------------------------------------------------------------
 
+---@type function
 local encode
 
 local escape_char_map = {
@@ -67,7 +64,9 @@ local function encode_nil()
     return "null"
 end
 
-
+---@param val table<any, any>
+---@param stack table<any, boolean>
+---@return string
 local function encode_table(val, stack)
     local res = {}
     stack = stack or {}
@@ -146,9 +145,11 @@ function RCReadyCheck:SerializeJSON(val)
     return (encode(val))
 end
 
+---@type function
 local parse
 
 local function create_set(...)
+    ---@type table<string, boolean>
     local res = {}
     for i = 1, select("#", ...) do
         res[select(i, ...)] = true
@@ -209,6 +210,8 @@ local function codepoint_to_utf8(n)
 end
 
 
+---@param s string
+---@return string
 local function parse_unicode_escape(s)
     local n1 = tonumber(s:sub(1, 4), 16)
     local n2 = tonumber(s:sub(7, 10), 16)
@@ -221,7 +224,11 @@ local function parse_unicode_escape(s)
 end
 
 
+---@param str string
+---@param i number
+---@return string?, number?
 local function parse_string(str, i)
+    ---@type string
     local res = ""
     local j = i + 1
     local k = j
@@ -239,7 +246,7 @@ local function parse_string(str, i)
                 local hex = str:match("^[dD][89aAbB]%x%x\\u%x%x%x%x", j + 1)
                     or str:match("^%x%x%x%x", j + 1)
                     or decode_error(str, j - 1, "invalid unicode escape in string")
-                res = res .. parse_unicode_escape(hex)
+                res = res .. parse_unicode_escape(hex) --[[@as string]]
                 j = j + #hex
             else
                 if not escape_chars[c] then
@@ -260,6 +267,10 @@ local function parse_string(str, i)
 end
 
 
+---@param str string
+---@param i number
+---@return number?
+---@return integer
 local function parse_number(str, i)
     local x = next_char(str, i, delim_chars)
     local s = str:sub(i, x - 1)
@@ -271,6 +282,10 @@ local function parse_number(str, i)
 end
 
 
+---@param str string
+---@param i number
+---@return boolean|nil
+---@return integer
 local function parse_literal(str, i)
     local x = next_char(str, i, delim_chars)
     local word = str:sub(i, x - 1)
@@ -280,12 +295,16 @@ local function parse_literal(str, i)
     return literal_map[word], x
 end
 
-
+---@param str string
+---@param i number
+---@return table
+---@return integer
 local function parse_array(str, i)
     local res = {}
     local n = 1
     i = i + 1
     while 1 do
+        ---@type number
         local x
         i = next_char(str, i, space_chars, true)
         -- Empty / end of array?
@@ -294,7 +313,9 @@ local function parse_array(str, i)
             break
         end
         -- Read token
+        ---@type number, number
         x, i = parse(str, i)
+        ---@type table<number, any>
         res[n] = x
         n = n + 1
         -- Next token
@@ -307,11 +328,15 @@ local function parse_array(str, i)
     return res, i
 end
 
-
+---@param str string
+---@param i number
+---@return table
+---@return integer
 local function parse_object(str, i)
     local res = {}
     i = i + 1
     while 1 do
+        ---@type string, number
         local key, val
         i = next_char(str, i, space_chars, true)
         -- Empty / end of object?
@@ -323,6 +348,7 @@ local function parse_object(str, i)
         if str:sub(i, i) ~= '"' then
             decode_error(str, i, "expected string for key")
         end
+        ---@type string, number
         key, i = parse(str, i)
         -- Read ':' delimiter
         i = next_char(str, i, space_chars, true)
@@ -331,8 +357,10 @@ local function parse_object(str, i)
         end
         i = next_char(str, i + 1, space_chars, true)
         -- Read value
+        ---@type number, number
         val, i = parse(str, i)
         -- Set
+        ---@type table<string, any>
         res[key] = val
         -- Next token
         i = next_char(str, i, space_chars, true)
@@ -365,7 +393,9 @@ local char_func_map = {
     ["{"] = parse_object,
 }
 
-
+---@param str string
+---@param idx number
+---@return (any?)
 parse = function(str, idx)
     local chr = str:sub(idx, idx)
     local f = char_func_map[chr]

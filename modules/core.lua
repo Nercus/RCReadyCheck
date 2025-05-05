@@ -1,15 +1,10 @@
----@type string
-local AddOnName = ...
-
----@class RCReadyCheck : NercLibAddon
-local RCReadyCheck = LibStub("NercLib"):GetAddon(AddOnName)
+---@class RCReadyCheck : NercUtilsAddon
+local RCReadyCheck = LibStub("NercUtils"):GetAddon(...)
 
 
-local SlashCommand = RCReadyCheck:GetModule("SlashCommand")
-SlashCommand:SetSlashTrigger("/rcrc")
-SlashCommand:EnableHelpCommand('help', 'Show This Help Message')
+RCReadyCheck:SetSlashTrigger("/rcrc", 1)
+RCReadyCheck:EnableHelpCommand()
 
-local Debug = RCReadyCheck:GetModule("Debug")
-if Debug.AddAddonToWhitelist then
-    Debug:AddAddonToWhitelist("RCLootCouncil")
+if RCReadyCheck.AddAddonToWhitelist then
+    RCReadyCheck:AddAddonToWhitelist("RCLootCouncil")
 end

@@ -42,7 +42,9 @@
         "libs"
     ],
     "Lua.diagnostics.disable": [
-        "redefined-local"
+        "redefined-local",
+        "assign-type-mismatch",
+        "undefined-field",
     ],
     "Lua.diagnostics.neededFileStatus": {
         "global-element": "Any",
@@ -59,28 +61,25 @@
         "ScrollFrame_OnLoad",
         "StaticPopupDialogs"
     ],
-    "cSpell.words": [
-        "callbackhandler",
-        "herebedragons",
-        "libdatabroker",
-        "libdbicon",
-        "libdeflate",
-        "libstub",
-        "Nerc",
-        "nerclib",
-        "nolib",
-        "rcrc",
-        "Readycheck",
-        "readycheckio",
-        "realrow",
-        "sortnext",
-        "strsplit",
-        "strsplittable",
-        "unicode"
-    ],
     "Lua.workspace.library": [
-        "~\\Documents\\FramexmlAnnotations",
-        "libs\\NercLib",
+        "libs\\NercUtils",
         "~\\.vscode\\extensions\\ketho.wow-api-0.20.6\\Annotations\\Core"
     ],
+    "dryerLint.ruleSets": [
+        {
+            "name": "WoW Addon Code Styling",
+            "language": "lua",
+            "glob": "{*.lua,**/!(libs)/**/*.lua}",
+            "rules": [
+                {
+                    // "name" is a string used to identify the rule
+                    "name": "NoPrint",
+                    "pattern": "\\bprint\\s*\\(",
+                    "message": "Don't use print in production code.",
+                    "fix": "",
+                    "severity": "Error",
+                },
+            ]
+        },
+    ]
 }
