@@ -4,7 +4,6 @@ local RCReadyCheck = select(2, ...)
 ---@class ImportFrame
 local ImportFrame = RCReadyCheck:GetModule("ImportFrame")
 local Database = RCReadyCheck:GetModule("Database")
-local Text = RCReadyCheck:GetModule("Text")
 local JSON = RCReadyCheck:GetModule("JSON")
 
 
@@ -15,7 +14,7 @@ function ImportFrame:ParseImport(importString)
         ---@type table<string, any>
         local data = JSON:Deserialize(importString)
         if data then
-            Text:Print("Data imported")
+            RCReadyCheck:Print("Data imported")
             Database:SetBulkData(data.selections)
             success = true
         end
@@ -23,7 +22,7 @@ function ImportFrame:ParseImport(importString)
     if (success) then
         self:CloseImportFrame()
     else
-        Text:Print("Failed to import")
+        RCReadyCheck:Print("Failed to import")
     end
 end
 

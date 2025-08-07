@@ -97,11 +97,5 @@ function RCReadyCheck:EnableHelpCommand()
 end
 
 RCReadyCheck:RegisterEvent("PLAYER_LOGIN", function()
-    local isTomTomLoaded = C_AddOns.IsAddOnLoaded("TomTom")
-    RCReadyCheck:SetSlashTrigger("/mph", 1)
-    RCReadyCheck:SetSlashTrigger("/mpe", 2)
-    if not isTomTomLoaded then
-        RCReadyCheck:SetSlashTrigger("/way", 3)
-    end
-    RCReadyCheck.isTomTomLoaded = isTomTomLoaded
+    RCReadyCheck:SetSlashTrigger("/rcrc", 1)
 end)

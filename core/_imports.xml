@@ -9,9 +9,7 @@
     <Include file="slash.lua" />
     <Include file="tests.lua" />
     <Include file="debug.lua" />
-    <Include file="fuzzy.lua" />
     <Include file="version.lua" />
-    <Include file="transmission.lua" />
 
     <!--@do-not-package@-->
     <Frame
