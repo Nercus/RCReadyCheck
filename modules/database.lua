@@ -1,12 +1,11 @@
----@class RCReadyCheck : NercUtilsAddon
-local RCReadyCheck = LibStub("NercUtils"):GetAddon(...)
+---@class RCReadyCheck
+local RCReadyCheck = select(2, ...)
 
 ---@class Database
 ---@field db table<string, table<number, ImportDataEntry>>
 local Database = RCReadyCheck:GetModule("Database")
 
 Database.db = {}
-
 
 ---@class ImportDataEntry
 ---@field wowItemId? string
@@ -83,12 +82,15 @@ function Database:ShowOutdatedDBWarning()
     if not lastImport then
         return
     end
+
+    if not IsInRaid() then
+        return
+    end
+
     local diff = time() - lastImport
     if diff > TIME_UNTIL_WARNING then
         RCReadyCheck:Print(RCReadyCheck:WrapTextInColor("The imported data is outdated. Please import new data.",
             ERROR_COLOR))
-        UIErrorsFrame:AddMessage("RCReadyCheck: The imported data is outdated. Please import new data.",
-            ERROR_COLOR:GetRGBA() --[[@as number]])
     end
 end
 

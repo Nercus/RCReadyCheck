@@ -1,4 +1,10 @@
 {
+    "[lua]": {
+        "editor.defaultFormatter": "sumneko.lua"
+    },
+    "[xml]": {
+        "editor.defaultFormatter": "redhat.vscode-xml"
+    },
     "editor.tabSize": 4,
     "workbench.colorCustomizations": {
         "commandCenter.border": "#e7e7e799",
@@ -63,7 +69,8 @@
     ],
     "Lua.workspace.library": [
         "libs\\NercUtils",
-        "~\\.vscode\\extensions\\ketho.wow-api-0.20.6\\Annotations\\Core"
+        "~\\.vscode\\extensions\\ketho.wow-api-0.20.8\\Annotations\\Core",
+        "~\\.vscode\\extensions\\ketho.wow-api-0.20.8\\Annotations\\FrameXML"
     ],
     "dryerLint.ruleSets": [
         {
@@ -81,5 +88,34 @@
                 },
             ]
         },
-    ]
+    ],
+    "editor.formatOnSave": true,
+    "editor.indentSize": "tabSize",
+    "editor.tabCompletion": "onlySnippets",
+    "Lua.diagnostics.groupFileStatus": {
+        "ambiguity": "Any",
+        "await": "Any",
+        "duplicate": "Any",
+        "global": "Any",
+        "luadoc": "Any",
+        "redefined": "Any",
+        "strict": "Any",
+        "strong": "Any",
+        "type-check": "Any",
+        "unbalanced": "Any",
+        "unused": "Any"
+    },
+    "Lua.diagnostics.libraryFiles": "Disable",
+    "Lua.format.defaultConfig": {
+        "indent_size": "4",
+        "indent_style": "space"
+    },
+    "Lua.hint.setType": false,
+    "material-icon-theme.folders.associations": {
+        "panel": "Template",
+        "pins": "Taskfile",
+        "sets": "Queue",
+        "tracker": "Ui"
+    },
+    "Lua.type.weakUnionCheck": true,
 }

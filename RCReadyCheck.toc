@@ -1,4 +1,4 @@
-## Interface: 110100
+## Interface: 110200
 
 ## Title: RCLootCouncil Readycheck.io
 ## Notes: Incorporates Readycheck.io data into RCLootCouncil
@@ -23,4 +23,5 @@
 
 libs\_imports.xml
 RCReadyCheck.lua
+core\_imports.xml
 modules\_imports.xml

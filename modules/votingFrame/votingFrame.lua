@@ -1,5 +1,5 @@
----@class RCReadyCheck : NercUtilsAddon
-local RCReadyCheck = LibStub("NercUtils"):GetAddon(...)
+---@class RCReadyCheck
+local RCReadyCheck = select(2, ...)
 
 ---@class VotingFrame
 local VotingFrame = RCReadyCheck:GetModule("VotingFrame")
